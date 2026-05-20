@@ -90,7 +90,7 @@ async function callAI(prompt, system = "") {
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5",
       max_tokens: 4000,
       system: system || "Eres el asistente nutricional de José Leiro Elite Coach. Responde siempre en español. Cuando generes planes nutricionales, sé muy específico con cantidades, ingredientes y recetas.",
       messages: [{ role: "user", content: prompt }],
