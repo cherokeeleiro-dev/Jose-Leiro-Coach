@@ -156,7 +156,7 @@ Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
 
   const raw = await callAI(fullPrompt);
   const clean = raw.replace(/```json|```/g, "").trim();
-  return JSON.parse(clean);
+  const match = clean.match(/\{[\s\S]*\}/); return JSON.parse(match ? match[0] : clean);
 }
 
 // ── STYLE HELPERS ──────────────────────────────────────────────
