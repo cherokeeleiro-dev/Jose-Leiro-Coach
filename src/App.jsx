@@ -154,9 +154,18 @@ Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
   ]
 }`;
 
-  const raw = await callAI(fullPrompt);
-  const clean = raw.replace(/```json|```/g, "").trim();
-  const match = clean.match(/\{[\s\S]*\}/); return JSON.parse(match ? match[0] : clean);
+  const allDays = [];
+  for (let w = 1; w <= weeks; w++) {
+    const weekPrompt = `${fullPrompt}
+
+Genera SOLO la semana ${w} de ${weeks}. Responde SOLO con JSON: {"week_number":${w},"days":[...]}`;
+    const raw = await callAI(weekPrompt);
+    const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
+    const match = clean.match(/\{[\s\S]*\}/);
+    const weekData = JSON.parse(match ? match[0] : clean);
+    allDays.push(...(weekData.days || []));
+  }
+  return {plan_title: "Plan Nutricional", total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 70, weeks: Array.from({length: weeks}, (_, i) => ({week_number: i+1, days: allDays.slice(i*7, (i+1)*7)}))};
 }
 
 // ── STYLE HELPERS ──────────────────────────────────────────────
