@@ -154,16 +154,17 @@ Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
   ]
 }`;
 
-  const allDays = [];
-  for (let w = 1; w <= weeks; w++) {
-    const weekPrompt = `${fullPrompt}
-
-Genera SOLO la semana ${w} de ${weeks}. Responde SOLO con JSON: {"week_number":${w},"days":[...]}`;
-    const raw = await callAI(weekPrompt);
+    const allDays = [];
+  const totalDays = weeks * 7;
+  const dayNames = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+  for (let d = 1; d <= totalDays; d++) {
+    const dayName = dayNames[(d - 1) % 7];
+    const dayPrompt = `${fullPrompt}\n\nGenera SOLO el día ${d} (${dayName}) con 5 comidas. Responde ÚNICAMENTE con JSON: {"day":${d},"day_name":"${dayName}","meals":[{"meal_type":"...","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]}]}`;
+    const raw = await callAI(dayPrompt);
     const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
     const match = clean.match(/\{[\s\S]*\}/);
-    const weekData = JSON.parse(match ? match[0] : clean);
-    allDays.push(...(weekData.days || []));
+    const dayData = JSON.parse(match ? match[0] : clean);
+    allDays.push(dayData);
   }
   return {plan_title: "Plan Nutricional", total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 70, weeks: Array.from({length: weeks}, (_, i) => ({week_number: i+1, days: allDays.slice(i*7, (i+1)*7)}))};
 }
