@@ -154,18 +154,21 @@ Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
   ]
 }`;
 
-    const allDays = [];
-  const totalDays = weeks * 7;
-  const dayNames = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-  for (let d = 1; d <= totalDays; d++) {
-    const dayName = dayNames[(d - 1) % 7];
-    const dayPrompt = `${fullPrompt}\n\nGenera SOLO el día ${d} (${dayName}) con 5 comidas. Responde ÚNICAMENTE con JSON: {"day":${d},"day_name":"${dayName}","meals":[{"meal_type":"...","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]}]}`;
-    const raw = await callAI(dayPrompt);
-    const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
-    const match = clean.match(/\{[\s\S]*\}/);
-    const dayData = JSON.parse(match ? match[0] : clean);
-    allDays.push(dayData);
-  }
+      const totalDays = weeks * 7;
+  const dayNames = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"];
+
+  const allDays = await Promise.all(
+    Array.from({ length: totalDays }, (_, i) => {
+      const d = i + 1;
+      const dayName = dayNames[i % 7];
+      const dayPrompt = `${fullPrompt}\n\nGenera SOLO el dia ${d} (${dayName}) con 5 comidas. Responde UNICAMENTE con este JSON sin texto extra: {"day":${d},"day_name":"${dayName}","meals":[{"meal_type":"Desayuno","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]},{"meal_type":"Media manana","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]},{"meal_type":"Comida","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]},{"meal_type":"Merienda","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]},{"meal_type":"Cena","name":"...","calories":0,"protein":0,"carbs":0,"fat":0,"recipe":"...","ingredients":[]}]}`;
+      return callAI(dayPrompt).then(raw => {
+        const clean = raw.replace(/```json|```/g, "").trim();
+        const match = clean.match(/{[\s\S]*}/);
+        return JSON.parse(match ? match[0] : clean);
+      });
+    })
+  );
   return {plan_title: "Plan Nutricional", total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 70, weeks: Array.from({length: weeks}, (_, i) => ({week_number: i+1, days: allDays.slice(i*7, (i+1)*7)}))};
 }
 
