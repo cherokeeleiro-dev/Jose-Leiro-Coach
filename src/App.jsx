@@ -510,7 +510,7 @@ function DayEditor({ day }) {
                 <div style={{ color: "#fff", fontSize: 14 }}>{m.name}</div>
                 <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 2 }}>{m.calories} kcal · P:{m.protein_g}g · C:{m.carbs_g}g · G:{m.fat_g}g</div>
               </div>
-              <button onClick={() => setEditMeal(m)} style={{ ...btnGhost, padding: "6px 10px", fontSize: 12 }}>✏️</button>
+              <button onClick={async () => { const ings = await db.getIngredients(m.id); setEditMeal({...m, ingredients: ings}); }} style={{ ...btnGhost, padding: "6px 10px", fontSize: 12 }}>✏️</button>
             </div>
           </Card>
         ))
