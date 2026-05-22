@@ -120,7 +120,7 @@ ${clientInfo}
 Genera un plan nutricional de ${weeks} semanas con ${numMeals} comidas al día.
 Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
 {
-  "plan_title": "Nombre del plan",
+  "plan_title": "",
   "total_calories": 2000,
   "protein_g": 150,
   "carbs_g": 200,
@@ -387,6 +387,7 @@ function PlansTab({ client }) {
       ) : (
         <Card style={{ marginBottom: 16 }}>
           <div style={{ color: G, fontSize: 9, letterSpacing: 3, textTransform: "uppercase", marginBottom: 12 }}>Nuevo Plan Nutricional</div>
+              <div style={{ gridColumn: "1/-1" }}><Label>Nombre del plan</Label><input value={genForm.plan_title || ""} onChange={e => setGenForm(f => ({ ...f, plan_title: e.target.value }))} placeholder="Ej: Plan Mayo Ana" style={iS} /></div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
             <div>
               <Label>Comidas por día</Label>
