@@ -541,7 +541,17 @@ function MealEditor({ meal, onSave, onCancel }) {
             ))}
           </div>
           <div><Label>Receta / Preparación</Label><textarea value={form.recipe || ""} onChange={e => set("recipe", e.target.value)} rows={5} style={{ ...iS, resize: "vertical" }} /></div>
-          <div><Label>URL de imagen (opcional)</Label><input value={form.image_url || ""} onChange={e => set("image_url", e.target.value)} style={iS} /></div>
+          <div style={{ gridColumn: "1/-1" }}>
+              <Label>Ingredientes</Label>
+              {(form.ingredients || []).map((ing, idx) => (
+                <div key={idx} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                  <input value={ing.name || ""} onChange={e => { const arr = [...(form.ingredients||[])]; arr[idx] = {...arr[idx], name: e.target.value}; set("ingredients", arr); }} placeholder="Ingrediente" style={{ ...iS, flex: 2 }} />
+                  <input type="number" value={ing.quantity || ""} onChange={e => { const arr = [...(form.ingredients||[])]; arr[idx] = {...arr[idx], quantity: e.target.value}; set("ingredients", arr); }} placeholder="Cant." style={{ ...iS, flex: 1 }} />
+                  <input value={ing.unit || ""} onChange={e => { const arr = [...(form.ingredients||[])]; arr[idx] = {...arr[idx], unit: e.target.value}; set("ingredients", arr); }} placeholder="Ud." style={{ ...iS, flex: 1 }} />
+                </div>
+              ))}
+            </div>
+            <div><Label>URL de imagen (opcional)</Label><input value={form.image_url || ""} onChange={e => set("image_url", e.target.value)} style={iS} /></div>
         </div>
       </Card>
       <button onClick={() => onSave(form)} style={{ ...btnPrimary, width: "100%", marginTop: 12 }}>💾 Guardar Cambios</button>
