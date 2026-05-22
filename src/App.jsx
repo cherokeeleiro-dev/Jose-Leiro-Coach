@@ -358,7 +358,7 @@ function PlansTab({ client }) {
           const savedDay = await db.createPlanDay({ plan_id: saved.id, day_number: dayNum, date: d.toISOString().split("T")[0] });
           for (const meal of day.meals) {
             const imgUrl = getFoodImage(meal.name);
-            const savedMeal = await db.createMeal({ plan_day_id: savedDay.id, meal_order: mealIdx + 1, name: meal.name, time_of_day: meal.time_of_day, description: meal.description, image_url: imgUrl, calories: meal.calories, protein_g: meal.protein_g, carbs_g: meal.carbs_g, fat_g: meal.fat_g, recipe: meal.recipe });
+            const savedMeal = await db.createMeal({ plan_day_id: savedDay.id, meal_order: day.meals.indexOf(meal) + 1, name: meal.name, time_of_day: meal.time_of_day, description: meal.description, image_url: imgUrl, calories: meal.calories, protein_g: meal.protein_g, carbs_g: meal.carbs_g, fat_g: meal.fat_g, recipe: meal.recipe });
             for (const ing of meal.ingredients || []) {
               await db.createIngredient({ meal_id: savedMeal.id, name: ing.name, quantity: ing.quantity, unit: ing.unit, food_group: ing.food_group });
             }
