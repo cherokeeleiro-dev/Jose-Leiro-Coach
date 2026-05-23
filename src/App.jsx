@@ -168,7 +168,7 @@ Responde SOLO con JSON válido, sin texto adicional, con esta estructura exacta:
     allDays.push(JSON.parse(match ? match[0] : clean));
     if (i < totalDays - 1) await new Promise(r => setTimeout(r, 15000));
   }
-  return {plan_title: "Plan Nutricional", total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 70, weeks: Array.from({length: weeks}, (_, i) => ({week_number: i+1, days: allDays.slice(i*7, (i+1)*7)}))};
+  return {plan_title: genForm.plan_title || "Plan Nutricional", total_calories: (() => { const m = genForm.prompt.match(/(\d+)\s*kcal/i); return m ? parseInt(m[1]) : 2000; })(), protein_g: 150, carbs_g: 200, fat_g: 70, weeks: Array.from({length: weeks}, (_, i) => ({week_number: i+1, days: allDays.slice(i*7, (i+1)*7)}))};
 }
 
 // ── STYLE HELPERS ──────────────────────────────────────────────
