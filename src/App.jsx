@@ -101,7 +101,21 @@ async function generateMealPlan(client, numMeals, prompt, weeks) {
   const fullPrompt = `${prompt}\n\nDATOS DEL CLIENTE:\n${clientInfo}\n\nGenera un plan nutricional de ${weeks} semanas con ${numMeals} comidas al dia.\nResponde SOLO con JSON valido, sin texto adicional:\n{"plan_title":"Nombre del plan","total_calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"weeks":[{"week_number":1,"days":[{"day_number":1,"meals":[{"meal_order":1,"name":"Desayuno","time_of_day":"08:00","description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"recipe":"...","ingredients":[{"name":"...","quantity":"100","unit":"g","food_group":"..."}]}}]}]}]}`;
   const raw = await callAI(fullPrompt);
   const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
-  return JSON.parse(clean);
+  try {
+    return JSON.parse(clean);
+  } catch (err) {
+    const lastBrace = clean.lastIndexOf('}');
+    const lastBracket = clean.lastIndexOf(']');
+    const cut = Math.max(lastBrace, lastBracket);
+    if (cut > 0) {
+      let attempt = clean.slice(0, cut + 1);
+      const opens = (attempt.match(/\{/g) || []).length;
+      const closes = (attempt.match(/\}/g) || []).length;
+      for (let i = 0; i < opens - closes; i++) attempt += '}';
+      try { return JSON.parse(attempt); } catch (e2) {}
+    }
+    throw new Error('La respuesta de la IA se cortó antes de completarse. Prueba a reducir el número de comidas o semanas, o inténtalo de nuevo.');
+  }
 }
 
 const iS = { width: "100%", background: "rgba(255,255,255,0.05)", border: `1px solid ${GB}`, borderRadius: 3, color: "#fff", padding: "10px 13px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
