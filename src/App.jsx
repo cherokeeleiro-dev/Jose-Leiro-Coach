@@ -86,7 +86,7 @@ async function callAI(prompt, system = "") {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-5",
-      max_tokens: 4000,
+      max_tokens: 3000,
       system: system || "Eres el asistente nutricional de Jose Leiro Elite Coach. Responde siempre en espanol. Cuando generes planes nutricionales, se muy especifico con cantidades, ingredientes y recetas.",
       messages: [{ role: "user", content: prompt }],
     }),
@@ -98,7 +98,7 @@ async function callAI(prompt, system = "") {
 
 async function generateMealPlan(client, numMeals, prompt, weeks) {
   const clientInfo = `Cliente: ${client.name}, Genero: ${client.gender || "No especificado"}, Pais: ${client.country || "No especificado"}, Peso: ${client.weight_kg || "?"} kg, Altura: ${client.height_cm || "?"} cm, Objetivo: ${client.goal || "No especificado"}`;
-  const fullPrompt = `${prompt}\n\nDATOS DEL CLIENTE:\n${clientInfo}\n\nGenera un plan nutricional de ${weeks} semanas con ${numMeals} comidas al dia.\nResponde SOLO con JSON valido, sin texto adicional:\n{"plan_title":"Nombre del plan","total_calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"weeks":[{"week_number":1,"days":[{"day_number":1,"meals":[{"meal_order":1,"name":"Desayuno","time_of_day":"08:00","description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"recipe":"...","ingredients":[{"name":"...","quantity":"100","unit":"g","food_group":"..."}]}]}]}]}`;
+  const fullPrompt = `${prompt}\n\nDATOS DEL CLIENTE:\n${clientInfo}\n\nGenera un plan nutricional de ${weeks} semanas con ${numMeals} comidas al dia.\nResponde SOLO con JSON valido, sin texto adicional:\n{"plan_title":"Nombre del plan","total_calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"weeks":[{"week_number":1,"days":[{"day_number":1,"meals":[{"meal_order":1,"name":"Desayuno","time_of_day":"08:00","description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"recipe":"...","ingredients":[{"name":"...","quantity":"100","unit":"g","food_group":"..."}]}}]}]}]}`;
   const raw = await callAI(fullPrompt);
   const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
   return JSON.parse(clean);
