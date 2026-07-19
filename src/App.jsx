@@ -98,64 +98,7 @@ async function callAI(prompt, system = "") {
 
 async function generateMealPlan(client, numMeals, prompt, weeks) {
   const clientInfo = `Cliente: ${client.name}, Genero: ${client.gender || "No especificado"}, Pais: ${client.country || "No especificado"}, Peso: ${client.weight_kg || "?"} kg, Altura: ${client.height_cm || "?"} cm, Objetivo: ${client.goal || "No especificado"}`;
-
-  function parseAIResponse(raw) {
-    const clean = raw.replace(/```json|```/g, "").trim();
-    try {
-      return JSON.parse(clean);
-    } catch (err) {
-      const lastBrace = clean.lastIndexOf('}');
-      const lastBracket = clean.lastIndexOf(']');
-      const cut = Math.max(lastBrace, lastBracket);
-      if (cut > 0) {
-        let attempt = clean.slice(0, cut + 1);
-        const opens = (attempt.match(/\{/g) || []).length;
-        const closes = (attempt.match(/\}/g) || []).length;
-        for (let i = 0; i < opens - closes; i++) attempt += '}';
-        try { return JSON.parse(attempt); } catch (e2) {}
-      }
-      throw new Error('La respuesta de la IA se cortó antes de completarse en un día concreto. Prueba a reducir el número de comidas o inténtalo de nuevo.');
-    }
-  }
-
-  const allWeeks = [];
-  let totalCal = 0, totalProt = 0, totalCarb = 0, totalFat = 0, mealCount = 0;
-  let dayCounter = 0;
-  const totalDays = weeks * 7;
-
-  for (let w = 1; w <= weeks; w++) {
-    const days = [];
-    for (let d = 1; d <= 7; d++) {
-      dayCounter++;
-      const dayPrompt = `${prompt}\n\nDATOS DEL CLIENTE:\n${clientInfo}\n\nGenera SOLO un dia de plan nutricional (dia ${dayCounter} de ${totalDays}) con ${numMeals} comidas. Responde SOLO con JSON valido, sin texto adicional:\n{"meals":[{"meal_order":1,"name":"Desayuno","time_of_day":"08:00","description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"recipe":"...","ingredients":[{"name":"...","quantity":"100","unit":"g","food_group":"..."}]}]}`;
-      const raw = await callAI(dayPrompt);
-      const dayData = parseAIResponse(raw);
-      const meals = dayData.meals || [];
-      days.push({ day_number: d, meals });
-      for (const m of meals) {
-        totalCal += m.calories || 0;
-        totalProt += m.protein_g || 0;
-        totalCarb += m.carbs_g || 0;
-        totalFat += m.fat_g || 0;
-        mealCount++;
-      }
-      if (dayCounter < totalDays) await new Promise(r => setTimeout(r, 3000));
-    }
-    allWeeks.push({ week_number: w, days });
-  }
-
-  const calMatch = prompt.match(/\b(\d{3,4})\s*kcal/i);
-  const avgDailyCalories = calMatch ? parseInt(calMatch[1]) : Math.round(totalCal / totalDays);
-
-  return {
-    plan_title: "Plan generado",
-    total_calories: avgDailyCalories,
-    protein_g: Math.round(totalProt / totalDays),
-    carbs_g: Math.round(totalCarb / totalDays),
-    fat_g: Math.round(totalFat / totalDays),
-    weeks: allWeeks
-  };
-}`;
+  const fullPrompt = `${prompt}\n\nDATOS DEL CLIENTE:\n${clientInfo}\n\nGenera un plan nutricional de ${weeks} semanas con ${numMeals} comidas al dia.\nResponde SOLO con JSON valido, sin texto adicional:\n{"plan_title":"Nombre del plan","total_calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"weeks":[{"week_number":1,"days":[{"day_number":1,"meals":[{"meal_order":1,"name":"Desayuno","time_of_day":"08:00","description":"...","calories":0,"protein_g":0,"carbs_g":0,"fat_g":0,"recipe":"...","ingredients":[{"name":"...","quantity":"100","unit":"g","food_group":"..."}]}}]}]}]}`;
   const raw = await callAI(fullPrompt);
   const clean = raw.replace(/\`\`\`json|\`\`\`/g, "").trim();
   try {
