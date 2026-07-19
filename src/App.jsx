@@ -121,17 +121,20 @@ async function generateMealPlan(client, numMeals, prompt, weeks) {
   const allWeeks = [];
   let totalCal = 0, totalProt = 0, totalCarb = 0, totalFat = 0;
   let dayCounter = 0;
+  const usedMeals = [];
   const totalDays = weeks * 7;
 
   for (let w = 1; w <= weeks; w++) {
     const days = [];
     for (let d = 1; d <= 7; d++) {
       dayCounter++;
-      const dayPrompt = prompt + "\n\nDATOS DEL CLIENTE:\n" + clientInfo + "\n\nGenera SOLO un dia de plan nutricional (dia " + dayCounter + " de " + totalDays + ") con " + numMeals + " comidas. Responde SOLO con JSON valido, sin texto adicional: {\"meals\":[{\"meal_order\":1,\"name\":\"Desayuno\",\"time_of_day\":\"08:00\",\"description\":\"...\",\"calories\":0,\"protein_g\":0,\"carbs_g\":0,\"fat_g\":0,\"recipe\":\"...\",\"ingredients\":[{\"name\":\"...\",\"quantity\":\"100\",\"unit\":\"g\",\"food_group\":\"...\"}]}]}";
+      const avoidText = usedMeals.length > 0 ? ("\n\nNO repitas estas comidas ya usadas en este plan: " + usedMeals.join(", ") + ". Usa recetas e ingredientes distintos.") : "";
+      const dayPrompt = prompt + "\n\nDATOS DEL CLIENTE:\n" + clientInfo + "\n\nGenera SOLO un dia de plan nutricional (dia " + dayCounter + " de " + totalDays + ") con " + numMeals + " comidas, con variedad respecto a otros dias." + avoidText + " Responde SOLO con JSON valido, sin texto adicional: {\"meals\":[{\"meal_order\":1,\"name\":\"Desayuno\",\"time_of_day\":\"08:00\",\"description\":\"...\",\"calories\":0,\"protein_g\":0,\"carbs_g\":0,\"fat_g\":0,\"recipe\":\"...\",\"ingredients\":[{\"name\":\"...\",\"quantity\":\"100\",\"unit\":\"g\",\"food_group\":\"...\"}]}]}";
       const raw = await callAI(dayPrompt);
       const dayData = parseAIResponse(raw);
       const meals = dayData.meals || [];
       days.push({ day_number: d, meals: meals });
+      for (const m of meals) { if (m.name) usedMeals.push(m.name); }
       for (const m of meals) {
         totalCal += m.calories || 0;
         totalProt += m.protein_g || 0;
