@@ -156,6 +156,8 @@ async function generateMealPlan(client, numMeals, prompt, weeks) {
   };
 }
 
+const iS = { width: "100%", background: "rgba(255,255,255,0.05)", border: `1px solid ${GB}`, borderRadius: 3, color: "#fff", padding: "10px 13px", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+
 function Label({ children }) { return <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 9, letterSpacing: 2, textTransform: "uppercase", marginBottom: 5 }}>{children}</div>; }
 function Card({ children, style }) { return <div style={{ background: SF, border: `1px solid ${GB}`, borderRadius: 4, padding: 16, ...style }}>{children}</div>; }
 function GoldLine() { return <div style={{ width: 36, height: 1, background: G, margin: "12px auto" }} />; }
